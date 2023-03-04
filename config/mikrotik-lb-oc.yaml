@@ -1,0 +1,216 @@
+# Expiration Date:
+# Apik-WS: 7Agt
+# Nusa-WS: 11Agt
+---
+proxy-providers:
+  akun:
+    type: file
+    path: "./proxy_provider/Akun.yaml"
+    health-check:
+      enable: true
+      url: http://youtube.com/generate_204
+      interval: 10
+
+#######----------#######
+proxy-groups:
+#######----------#######
+# VPN with Bug - Proxies
+- name: Eth-1
+  type: select
+ # disable-udp: true
+  use:
+  - akun  
+  url: https://youtube.com/generate_204
+  interval: '10'
+  interface-name: eth1
+- name: Eth-2
+  type: select
+ # disable-udp: true
+  use:
+  - akun
+  url: https://youtube.com/generate_204
+  interval: '10'
+  interface-name: eth2
+- name: Eth-3
+  type: select
+#  disable-udp: true
+  #proxies:
+  use:
+  - akun
+ # - DIRECT
+  url: https://youtube.com/generate_204
+  interval: '10'
+  interface-name: wwan0
+# All Proxy Groups
+- name: MultiVPN
+  type: load-balance
+  strategy: round-robin
+  disable-udp: false
+  proxies:
+  - Eth-1
+  - Eth-2
+  - Eth-3
+  
+  url: http://youtube.com/generate_204
+  interval: '10'
+- name: Direct Multi-WAN
+  type: load-balance
+  proxies:
+  - Direct WAN 1
+  - Direct WAN 2
+  - Direct WAN 3
+  url: http://youtube.com/generate_204
+  interval: '10'
+# Proxy Groups Selector
+- name: VPN
+  type: select
+#  disable-udp: false
+  proxies:
+  - MultiVPN
+  - Direct Multi-WAN
+  - Eth-1
+  - Eth-2
+  - Eth-3
+  - Direct WAN 1
+  - Direct WAN 2
+  - Direct WAN 3  
+
+- name: GAME
+  type: select
+  disable-udp: false
+  proxies:
+  - MultiVPN
+  - Direct Multi-WAN
+  - Eth-1
+  - Eth-2
+  - Eth-3
+  - Direct WAN 1
+  - Direct WAN 2
+  - Direct WAN 3   
+
+- name: Ads
+  type: select
+  disable-udp: false
+  proxies:
+  - VPN
+  - REJECT
+
+  
+
+
+
+- name: Direct WAN 1
+  type: select
+  interface-name: eth1
+  proxies:
+  - DIRECT
+- name: Direct WAN 2
+  type: select
+  interface-name: eth2
+  proxies:
+  - DIRECT
+- name: Direct WAN 3
+  type: select
+  interface-name: wwan0
+  proxies:
+  - DIRECT
+
+# Rule Providers
+# Check time conversion here https://www.timecalculator.net/hours-to-seconds
+# 86400 mean 24 hours
+rule-providers:
+  Game_MobileLegends_Ports:
+    type: http
+    behavior: classical
+    path: "./rule_provider/Game_MobileLegends_Ports.yaml"
+    url: https://raw.githubusercontent.com/helmiau/clashrules/main/rule_provider/Game_MobileLegends_Ports.yaml
+    interval: 86400
+  adaway:
+    type: http
+    behavior: classical
+    path: "./rule_provider/adaway.yaml"
+    url: https://raw.githubusercontent.com/hillz2/openclash_adblock/main/adaway.yaml
+    interval: 14400 # Update rules every 4 hours
+  adguard_dns:
+    type: http
+    behavior: classical
+    path: "./rule_provider/AdguardDNS.yaml"
+    url: https://raw.githubusercontent.com/hillz2/openclash_adblock/main/AdguardDNS.yaml
+    interval: 14400 # Update rules every 4 hours
+  abpindo:
+    type: http
+    behavior: classical
+    path: "./rule_provider/ABPindo.yaml"
+    url: https://raw.githubusercontent.com/hillz2/openclash_adblock/main/ABPindo.yaml
+    interval: 14400 # Update rules every 4 hours
+    
+rules:
+# Gaming Rule Set
+- RULE-SET,Game_MobileLegends_Ports,GAME
+# Block ads
+- RULE-SET,adaway,Ads
+- RULE-SET,adguard_dns,Ads
+- RULE-SET,abpindo,Ads
+# Listen all connections to VPN proxy group
+- MATCH,VPN # GLOBAL
+
+dns:
+  nameserver:
+  - 192.168.7.1
+  - 192.168.8.1
+  - 192.168.9.1
+  
+  fallback:
+  - tcp://8.8.8.8:53
+  - tcp://8.8.4.4:53
+  enable: true
+  ipv6: false
+  enhanced-mode: redir-host
+  listen: 127.0.0.1:7874
+  default-nameserver:
+  - 192.168.7.1
+  - 192.168.8.1
+  - 192.168.9.1
+  fallback-filter:
+    geoip: true
+    geoip-code: ID
+    ipcidr:
+    - 0.0.0.0/8
+    - 10.0.0.0/8
+    - 100.64.0.0/10
+    - 127.0.0.0/8
+    - 169.254.0.0/16
+    - 172.16.0.0/12
+    - 192.0.0.0/24
+    - 192.0.2.0/24
+    - 192.88.99.0/24
+    - 192.168.0.0/16
+    - 198.18.0.0/15
+    - 198.51.100.0/24
+    - 203.0.113.0/24
+    - 224.0.0.0/4
+    - 240.0.0.0/4
+    - 255.255.255.255/32
+redir-port: 7892
+tproxy-port: 7895
+port: 7890
+socks-port: 7891
+mixed-port: 7893
+mode: rule
+log-level: silent
+unified-delay: true
+allow-lan: true
+external-controller: 0.0.0.0:9090
+secret: reyre
+bind-address: "*"
+external-ui: "/usr/share/openclash/ui"
+ipv6: false
+tun:
+  enable: true
+  stack: system
+  dns-hijack:
+  - tcp://8.8.8.8:53
+  - tcp://8.8.4.4:53
+profile:
+  store-selected: true
+  store-fakeip: true

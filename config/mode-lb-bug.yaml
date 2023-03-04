@@ -1,0 +1,407 @@
+# Expiration Date:
+# Apik-WS: 7Agt
+# Nusa-WS: 11Agt
+---
+proxy-providers:
+  akun:
+    type: file
+    path: "./proxy_provider/Akun.yaml"
+    health-check:
+      enable: true
+      url: http://youtube.com/generate_204
+      interval: 180
+
+#######----------#######
+proxy-groups:
+#######----------#######
+# VPN with Bug - Proxies
+- name: auto
+  type: url-test
+  proxies:
+  - VPN
+  - ID-MultiVPN
+  - DO-MultiVPN
+  - Direct Multi-WAN
+  url: 'http://hi.bonds.id/ping'
+  interval: 300
+  tolerance: 50
+  lazy: false
+  disable-udp: false
+- name: Eth-1
+  type: select
+ # disable-udp: true
+  use:
+  - akun  
+  url: https://youtube.com/generate_204
+  interval: '30'
+  interface-name: eth2
+- name: Eth-2
+  type: select
+ # disable-udp: true
+  use:
+  - akun
+  url: https://youtube.com/generate_204
+  interval: '30'
+  interface-name: eth3
+- name: Eth-3
+  type: select
+#  disable-udp: true
+  #proxies:
+  use:
+  - akun
+ # - DIRECT
+  url: https://youtube.com/generate_204
+  interval: '30'
+  interface-name: wwan0
+  #Do-akun
+- name: Do-Eth-1
+  type: select
+ # disable-udp: true
+  use:
+  - akun  
+  url: https://youtube.com/generate_204
+  interval: '30'
+  interface-name: eth2
+- name: Do-Eth-2
+  type: select
+ # disable-udp: true
+  use:
+  - akun
+  url: https://youtube.com/generate_204
+  interval: '30'
+  interface-name: eth3
+- name: Do-Eth-3
+  type: select
+#  disable-udp: true
+  #proxies:
+  use:
+  - akun
+ # - DIRECT
+  url: https://youtube.com/generate_204
+  interval: '30'
+  interface-name: wwan0
+# All Proxy Groups
+- name: ID-MultiVPN
+  type: load-balance
+  strategy: round-robin
+ # disable-udp: false
+  proxies:
+  - Eth-1
+  - Eth-2
+  - Eth-3
+  url: http://youtube.com/generate_204
+  interval: '30'
+- name: DO-MultiVPN
+  type: load-balance
+  strategy: round-robin
+ # disable-udp: false
+  proxies:
+  - Do-Eth-1
+  - Do-Eth-2
+  - Do-Eth-3
+  
+  url: http://youtube.com/generate_204
+  interval: '30'
+- name: Direct Multi-WAN
+  type: load-balance
+  proxies:
+  - Direct WAN 1
+  - Direct WAN 2
+  - Direct WAN 3
+  url: http://youtube.com/generate_204
+  interval: '30'
+# Proxy Groups Selector
+- name: VPN
+  type: select
+#  disable-udp: false
+  proxies:
+  - ID-MultiVPN
+  - DO-MultiVPN
+  - Direct Multi-WAN
+  url: http://youtube.com/generate_204
+  interval: '30'
+- name: Gaming
+  type: select
+ # disable-udp: false
+  proxies:
+  - VPN
+  - ID-MultiVPN
+  - Direct Multi-WAN
+  - REJECT
+  - DO-MultiVPN
+  - Direct WAN 1
+  - Direct WAN 2
+  - Direct WAN 3
+  
+- name: GoogleFamily
+  type: select
+ # disable-udp: false
+  proxies:
+  - VPN
+  - Direct Multi-WAN
+  - REJECT
+  - ID-MultiVPN
+  - DO-MultiVPN
+  - Direct WAN 1
+  - Direct WAN 2
+  - Direct WAN 3
+  
+- name: XLAkrab
+  type: select
+ # disable-udp: false
+  proxies:
+  - VPN
+  - Direct Multi-WAN
+  - REJECT
+  - ID-MultiVPN
+  - DO-MultiVPN
+  - Direct WAN 1
+  - Direct WAN 2
+  - Direct WAN 3
+
+- name: Zerotier
+  type: select
+ # disable-udp: false
+  proxies:
+  - VPN
+  - Direct Multi-WAN
+  - REJECT
+  - ID-MultiVPN
+  - DO-MultiVPN
+  - Direct WAN 1
+  - Direct WAN 2
+  - Direct WAN 3
+- name: Direct WAN 1
+  type: select
+  interface-name: eth2
+  proxies:
+  - DIRECT
+- name: Direct WAN 2
+  type: select
+  interface-name: eth3
+  proxies:
+  - DIRECT
+- name: Direct WAN 3
+  type: select
+  interface-name: wwan0
+  proxies:
+  - DIRECT
+
+# Rule Providers
+# Check time conversion here https://www.timecalculator.net/hours-to-seconds
+# 86400 mean 24 hours
+rule-providers:
+  Zerotier:
+    type: http
+    behavior: classical
+    path: "./rule_provider/Zerotier.yaml"
+    url: https://raw.githubusercontent.com/masjeho1/portgame/main/Zerotier.yaml
+    interval: 86400
+
+
+
+  XLAkrab:
+    type: http
+    behavior: classical
+    path: "./rule_provider/XL_Akrab.yaml"
+    url: https://raw.githubusercontent.com/helmiau/clashrules/main/rule_provider/XL_Akrab.yaml
+    interval: 86400
+  myXL:
+    type: http
+    behavior: classical
+    path: "./rule_provider/myXL.yaml"
+    url: https://raw.githubusercontent.com/helmiau/clashrules/main/rule_provider/myXL.yaml
+    interval: 86400
+#game
+  Game_ArenaOfValor_Ports:
+    type: http
+    behavior: classical
+    path: "./rule_provider/Game_ArenaOfValor_Ports.yaml"
+    url: https://raw.githubusercontent.com/helmiau/clashrules/main/rule_provider/Game_ArenaOfValor_Ports.yaml
+    interval: 86400
+  miHoYo_GenshinImpact_Game:
+    type: http
+    behavior: classical
+    path: "./rule_provider/miHoYo_GenshinImpact_Game.yaml"
+    url: https://raw.githubusercontent.com/helmiau/clashrules/main/rule_provider/miHoYo_GenshinImpact_Game.yaml
+    interval: 86400
+  Game_Freefire_Ports:
+    type: http
+    behavior: classical
+    path: "./rule_provider/Game_Freefire_Ports.yaml"
+    url: https://raw.githubusercontent.com/helmiau/clashrules/main/rule_provider/Game_Freefire_Ports.yaml
+    interval: 86400
+  Game_LeagueOf_Legends_Ports:
+    type: http
+    behavior: classical
+    path: "./rule_provider/Game_LeagueOf_Legends_Ports.yaml"
+    url: https://raw.githubusercontent.com/helmiau/clashrules/main/rule_provider/Game_LeagueOf_Legends_Ports.yaml
+    interval: 86400
+  Game_MobileLegends_Ports:
+    type: http
+    behavior: classical
+    path: "./rule_provider/Game_MobileLegends_Ports.yaml"
+    url: https://raw.githubusercontent.com/helmiau/clashrules/main/rule_provider/Game_MobileLegends_Ports.yaml
+    interval: 86400
+  Game_PUBGMobile_Ports:
+    type: http
+    behavior: classical
+    path: "./rule_provider/Game_PUBGMobile_Ports.yaml"
+    url: https://raw.githubusercontent.com/helmiau/clashrules/main/rule_provider/Game_PUBGMobile_Ports.yaml
+    interval: 86400
+  Yu_Gi_Oh_Master_Duel:
+    type: http
+    behavior: classical
+    path: "./rule_provider/Yu_Gi_Oh_Master_Duel.yaml"
+    url: https://raw.githubusercontent.com/masjeho1/portgame/main/Yu_Gi_Oh_Master_Duel.yaml
+    interval: 86400
+  Seven_Knights_2:
+    type: http
+    behavior: classical
+    path: "./rule_provider/Seven_Knights_2.yaml"
+    url: https://raw.githubusercontent.com/masjeho1/portgame/main/Seven_Knights_2.yaml
+    interval: 86400
+  Domino_island:
+    type: http
+    behavior: classical
+    path: "./rule_provider/domino.yaml"
+    url: https://raw.githubusercontent.com/masjeho1/portgame/main/domino.yaml
+    interval: 86400
+
+# Google Family
+  BM_Google:
+    type: http
+    behavior: classical
+    path: "./rule_provider/BM_Google.yaml"
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Google/Google.yaml
+    interval: 86400
+  BM_GoogleDrive:
+    type: http
+    behavior: classical
+    path: "./rule_provider/BM_GoogleDrive.yaml"
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GoogleDrive/GoogleDrive.yaml
+    interval: 86400
+  BM_YouTubeMusic:
+    type: http
+    behavior: classical
+    path: "./rule_provider/BM_YouTubeMusic.yaml"
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/YouTubeMusic/YouTubeMusic.yaml
+    interval: 86400
+  BM_GoogleSearch:
+    type: http
+    behavior: classical
+    path: "./rule_provider/BM_GoogleSearch.yaml"
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GoogleSearch/GoogleSearch.yaml
+    interval: 86400
+  BM_GoogleVoice:
+    type: http
+    behavior: classical
+    path: "./rule_provider/BM_GoogleVoice.yaml"
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GoogleVoice/GoogleVoice.yaml
+    interval: 86400
+  BM_GoogleChromecast:
+    type: http
+    behavior: classical
+    path: "./rule_provider/BM_GoogleChromecast.yaml"
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Chromecast/Chromecast.yaml
+    interval: 86400
+  BM_YouTube:
+    type: http
+    behavior: classical
+    path: "./rule_provider/BM_YouTube.yaml"
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/YouTube/YouTube.yaml
+    interval: 86400
+  HA_Youtube:
+    type: http
+    behavior: classical
+    path: "./rule_provider/HA_Youtube.yaml"
+    url: https://raw.githubusercontent.com/helmiau/clashrules/main/rule_provider/Youtube.yaml
+    interval: 86400
+rules:
+# Gaming Rule Set
+- RULE-SET,Game_ArenaOfValor_Ports,Gaming
+- RULE-SET,miHoYo_GenshinImpact_Game,Gaming
+- RULE-SET,Game_Freefire_Ports,Gaming
+- RULE-SET,Game_LeagueOf_Legends_Ports,Gaming
+- RULE-SET,Game_MobileLegends_Ports,Gaming
+- RULE-SET,Game_PUBGMobile_Ports,Gaming
+- RULE-SET,Seven_Knights_2,Gaming
+- RULE-SET,Yu_Gi_Oh_Master_Duel,Gaming
+- RULE-SET,Domino_island,Gaming
+# Google Family
+- RULE-SET,BM_Google,GoogleFamily
+- RULE-SET,BM_GoogleDrive,GoogleFamily
+- RULE-SET,BM_YouTubeMusic,GoogleFamily
+- RULE-SET,BM_GoogleSearch,GoogleFamily
+- RULE-SET,BM_GoogleVoice,GoogleFamily
+- RULE-SET,BM_GoogleChromecast,GoogleFamily
+- RULE-SET,BM_YouTube,GoogleFamily
+- RULE-SET,HA_Youtube,GoogleFamily
+# XL Sites
+- RULE-SET,XLAkrab,XLAkrab
+- RULE-SET,Zerotier,Zerotier
+- RULE-SET,myXL,XLAkrab
+# Listen all connections to VPN proxy group
+- MATCH,VPN # GLOBAL
+dns:
+  nameserver:
+  - 192.168.7.1
+  - 192.168.8.1
+  - 192.168.9.1
+  
+  fallback:
+  - tcp://8.8.8.8:53
+  - tcp://8.8.4.4:53
+  
+
+  enable: true
+  ipv6: false
+  enhanced-mode: redir-host
+  listen: 127.0.0.1:7874
+  default-nameserver:
+  - 192.168.7.1
+  - 192.168.8.1
+  - 192.168.9.1
+  fallback-filter:
+    geoip: true
+    geoip-code: ID
+    ipcidr:
+    - 0.0.0.0/8
+    - 10.0.0.0/8
+    - 100.64.0.0/10
+    - 127.0.0.0/8
+    - 169.254.0.0/16
+    - 172.16.0.0/12
+    - 192.0.0.0/24
+    - 192.0.2.0/24
+    - 192.88.99.0/24
+    - 192.168.0.0/16
+    - 198.18.0.0/15
+    - 198.51.100.0/24
+    - 203.0.113.0/24
+    - 224.0.0.0/4
+    - 240.0.0.0/4
+    - 255.255.255.255/32
+redir-port: 7892
+tproxy-port: 7895
+port: 7890
+socks-port: 7891
+mixed-port: 7893
+mode: rule
+log-level: silent
+unified-delay: true
+allow-lan: true
+external-controller: 0.0.0.0:9090
+secret: reyre
+bind-address: "*"
+external-ui: "/usr/share/openclash/ui"
+ipv6: false
+tun:
+  enable: true
+  stack: system
+  dns-hijack:
+  - tcp://8.8.8.8:53
+  - tcp://8.8.4.4:53
+profile:
+  store-selected: true
+  store-fakeip: true

@@ -1,0 +1,23 @@
+#share_tips
+
+#Masalah ZeroTier Yang Tidak bisa diakses/lemot (Tidak mau Online).
+
+#Ini sering terjadi di Inject Sibiru karena tidak punya paket utama,
+#Kalau simerah masih bisa diakses karena dia memiliki Unlimited 128kbps.
+
+#caranya:
+#Hapus SrcIPCIDR 198.18.0.1/32, yg berada di usr/share/openclash/backup/openclash_costum_rule.list
+
+#Rule :
+payload:
+  # Zerotier
+  - DOMAIN,my.zerotier.com
+  - DOMAIN-SUFFIX,zerotier.com
+  - DST-PORT,9993
+  - DST-PORT,29994
+  - DST-PORT,40775
+  - DST-PORT,43215
+
+#ebih Jelasnya Lihat Pada Gambar
+#Trims
+
